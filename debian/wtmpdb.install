@@ -1,0 +1,6 @@
+usr/bin/wtmpdb
+usr/lib/systemd/system/wtmpdb-rotate.service
+usr/lib/systemd/system/wtmpdb-rotate.timer
+usr/lib/systemd/system/wtmpdb-update-boot.service
+usr/lib/tmpfiles.d/wtmpdb.conf
+usr/share/man/man8/wtmpdb.8

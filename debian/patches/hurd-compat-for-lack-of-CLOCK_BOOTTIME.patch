@@ -1,0 +1,28 @@
+From: Andrew Bower <andrew@bower.uk>
+Date: Wed, 5 Mar 2025 14:33:40 +0000
+Forwarded: no
+Subject: hurd: compat for lack of CLOCK_BOOTTIME
+
+---
+ src/wtmpdb.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/src/wtmpdb.c b/src/wtmpdb.c
+index 048e8b1..1813dda 100644
+--- a/src/wtmpdb.c
++++ b/src/wtmpdb.c
+@@ -1019,7 +1019,11 @@ main_boot (int argc, char **argv)
+   struct timespec ts_now;
+   struct timespec ts_boot;
+   clock_gettime (CLOCK_REALTIME, &ts_now);
++#ifdef CLOCK_BOOTTIME
+   clock_gettime (CLOCK_BOOTTIME, &ts_boot);
++#else
++  ts_boot = ts_now;
++#endif
+   uint64_t time = wtmpdb_timespec2usec (diff_timespec(&ts_now, &ts_boot));
+ #if HAVE_SYSTEMD
+   struct timespec ts_empty = { .tv_sec = 0, .tv_nsec = 0 };
+-- 
+2.47.2
+
