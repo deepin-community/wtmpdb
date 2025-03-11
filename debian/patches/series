@@ -1,0 +1,3 @@
+avoid-noise-if-systemd-not-running.patch
+hurd-compat-for-lack-of-CLOCK_BOOTTIME.patch
+hurd-avoid-PATH_MAX.patch

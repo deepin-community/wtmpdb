@@ -1,0 +1,52 @@
+From: Andrew Bower <andrew@bower.uk>
+Date: Thu, 6 Mar 2025 06:37:52 +0000
+Forwarded: no
+Subject: hurd: avoid PATH_MAX
+
+---
+ tests/tst-dlopen.c | 11 +++++++----
+ 1 file changed, 7 insertions(+), 4 deletions(-)
+
+diff --git a/tests/tst-dlopen.c b/tests/tst-dlopen.c
+index 7092716..9896a8f 100644
+--- a/tests/tst-dlopen.c
++++ b/tests/tst-dlopen.c
+@@ -13,28 +13,31 @@
+ 
+ #include <dlfcn.h>
+ #include <stdio.h>
+-#include <limits.h>
++#include <stdlib.h>
+ #include <sys/stat.h>
+ 
+ /* Simple program to see if dlopen() would succeed. */
+ int main(int argc, char **argv)
+ {
+   int i;
++  int rc;
+   struct stat st;
+-  char buf[PATH_MAX];
++  char *buf;
+ 
+   for (i = 1; i < argc; i++) {
+     if (dlopen(argv[i], RTLD_NOW)) {
+       fprintf(stdout, "dlopen() of \"%s\" succeeded.\n",
+               argv[i]);
+     } else {
+-      snprintf(buf, sizeof(buf), "./%s", argv[i]);
+-      if ((stat(buf, &st) == 0) && dlopen(buf, RTLD_NOW)) {
++      rc = asprintf(&buf, "./%s", argv[i]);
++      if (rc >= 0 && (stat(buf, &st) == 0) && dlopen(buf, RTLD_NOW)) {
+         fprintf(stdout, "dlopen() of \"./%s\" "
+                 "succeeded.\n", argv[i]);
++        free(buf);
+       } else {
+         fprintf(stdout, "dlopen() of \"%s\" failed: "
+                 "%s\n", argv[i], dlerror());
++        free(buf);
+         return 1;
+       }
+     }
+-- 
+2.47.2
+
