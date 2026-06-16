@@ -134,35 +134,56 @@ isipaddr (const char *string, int *addr_type,
 static int
 parse_time (const char *str, time_t *arg)
 {
-  struct tm res = { 0 };
+  const char *abs_datetime_fmts[] = {
+    "%Y%m%d%H%M%S",
+    "%Y-%m-%d %T",
+    "%Y-%m-%d %R",
+    "%Y-%m-%d",
+    NULL
+  };
+  const char *abs_time_fmts[] = {
+    "%T",
+    "%R",
+    NULL
+  };
+  const char **fmt;
+  struct tm rst = { .tm_isdst = -1 };
+  struct tm res;
+  char *r = NULL;
+  time_t t = time (NULL);
 
-  if (strcmp (str, "today") == 0)
+  for (fmt = abs_datetime_fmts; *fmt; fmt++)
     {
-      time_t t = time (NULL);
-      localtime_r (&t, &res);
-      res.tm_isdst = -1;
-      res.tm_sec = res.tm_min = res.tm_hour = 0;
-    }
-  else if (strcmp (str, "yesterday") == 0)
-    {
-      time_t t = time (NULL);
-      localtime_r (&t, &res);
-      res.tm_isdst = -1;
-      res.tm_mday--;
-      res.tm_sec = res.tm_min = res.tm_hour = 0;
-    }
-  else
-    {
-      char *r = strptime (str, "%Y-%m-%d %T",  &res);
-
-      if (r == NULL || *r != '\0')
-	{
-	  r = strptime (str, "%Y-%m-%d",  &res);
-	  if (r == NULL || *r != '\0')
-	    return -1;
-	}
+      res = rst;
+      r = strptime (str, *fmt, &res);
+      if (r != NULL && *r == '\0') goto done;
     }
 
+  /* Use today's date for time-only specs */
+  localtime_r (&t, &rst);
+  rst.tm_isdst = -1;
+
+  for (fmt = abs_time_fmts; *fmt; fmt++)
+    {
+      res = rst;
+      r = strptime (str, *fmt, &res);
+      if (r != NULL && *r == '\0') goto done;
+    }
+
+  if (strcmp (str, "now") == 0)
+    goto done;
+
+  /* Reset time of day for date-only specs */
+  res.tm_sec = res.tm_min = res.tm_hour = 0;
+
+  if (strcmp (str, "yesterday") == 0)
+    res.tm_mday--;
+  else if (strcmp (str, "tomorrow") == 0)
+    res.tm_mday++;
+  else if (strcmp (str, "today") != 0)
+    return -1;
+
+done:
   *arg = mktime (&res);
 
   return 0;
@@ -734,7 +755,7 @@ main_last (int argc, char **argv)
     {"service", no_argument, NULL, 'S'},
     {"since", required_argument, NULL, 's'},
     {"system", no_argument, NULL, 'x'},
-    {"until", required_argument, NULL, 'u'},
+    {"until", required_argument, NULL, 't'},
     {"time-format", required_argument, NULL, TIMEFMT_VALUE},
     {"json", no_argument, NULL, 'j'},
     {NULL, 0, NULL, '\0'}
@@ -804,7 +825,7 @@ main_last (int argc, char **argv)
 	case 'S':
 	  noservice = 0;
 	  break;
-	case 'u':
+	case 't':
 	  if (parse_time (optarg, &until) < 0)
 	    {
 	      fprintf (stderr, "Invalid time value '%s'\n", optarg);
@@ -1019,7 +1040,11 @@ main_boot (int argc, char **argv)
   struct timespec ts_now;
   struct timespec ts_boot;
   clock_gettime (CLOCK_REALTIME, &ts_now);
+#ifdef CLOCK_BOOTTIME
   clock_gettime (CLOCK_BOOTTIME, &ts_boot);
+#else
+  ts_boot = ts_now;
+#endif
   uint64_t time = wtmpdb_timespec2usec (diff_timespec(&ts_now, &ts_boot));
 #if HAVE_SYSTEMD
   struct timespec ts_empty = { .tv_sec = 0, .tv_nsec = 0 };

@@ -1,3 +1,61 @@
+wtmpdb (0.73.0-3+deb13u1) trixie; urgency=medium
+
+  * Rotate and prune logs using logrotate (Closes: #1094965)
+    - patch to handle empty file reading
+    - remove units and cron jobs for old (disabled) rotation solution
+    - cause new and rotated files to keep permissions (Closes: #1076308)
+  * Store logs in system log directory, /var/log (Closes: #1117719)
+  * Remove logs on package purge
+  * README.Debian: document new log handling
+
+ -- Andrew Bower <andrew@bower.uk>  Mon, 20 Oct 2025 19:32:19 +0100
+
+wtmpdb (0.73.0-3) unstable; urgency=medium
+
+  * Do not rotate database by default because the rotation operation does
+    not prune and therefore only has negative utility for users.
+    (Mitigates: #1094965)
+
+ -- Andrew Bower <andrew@bower.uk>  Sun, 04 May 2025 18:39:33 +0100
+
+wtmpdb (0.73.0-2) unstable; urgency=medium
+
+  [ Andrew Bower ]
+  * pam-configs: inhibit likely duplicate ssh entries (Closes: #1102643)
+  * add README.Debian to document consequential differences from wtmp
+
+ -- Andrew Bower <andrew@bower.uk>  Fri, 11 Apr 2025 22:09:16 +0100
+
+wtmpdb (0.73.0-1) unstable; urgency=medium
+
+  [ Andrew Bower ]
+  * New upstream version
+    - drop patches adopted upstream
+    - fixes time specifications (Closes: #1102101)
+  * patch to fix import of logins recorded by some wtmp writers
+  * refine man page for debian, appeasing lintian
+  * d/control:
+    - further extend package descriptions (Closes: #1083228)
+    - mark libwtmpdb-dev as Multi-Arch: same
+  * d/copyright: set missing Upstream-Contact field
+
+ -- Andrew Bower <andrew@bower.uk>  Wed, 09 Apr 2025 19:29:42 +0100
+
+wtmpdb (0.72.0-2) unstable; urgency=medium
+
+  * d/control: depend -dev package on library to fix broken symlinks
+  * d/copyright: remove lrc override and document content not used in binary
+  * d/patches:
+    - fix last -t short option for --until (Closes: #1102102)
+    - mark hurd patches as applied upstream
+  * maintscripts:
+    - force one-off reset of runlevels for wtmpdb-update-boot on upgrade
+      from versions between 0.13.0-6 and 0.72.0-1 (Closes: #1102167)
+    - import /var/log/wtmp on first installation
+    - no need to record a boot entry on installation
+
+ -- Andrew Bower <andrew@bower.uk>  Sun, 06 Apr 2025 17:49:15 +0100
+
 wtmpdb (0.72.0-1) unstable; urgency=medium
 
   [ Andrew Bower ]

@@ -1,3 +1,5 @@
+usr/lib/systemd/system/wtmpdb-rotate.service
+usr/lib/systemd/system/wtmpdb-rotate.timer
 usr/lib/systemd/system/wtmpdbd.service
 usr/lib/systemd/system/wtmpdbd.socket
 usr/libexec/wtmpdbd
