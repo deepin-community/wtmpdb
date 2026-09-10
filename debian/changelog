@@ -1,3 +1,9 @@
+wtmpdb (0.73.0-3+deb13u2) unstable; urgency=medium
+
+  * Rebuild with LTO enabled (dpkg vendor feature optimize/lto).
+
+ -- tunaichao <tunaichao@uniontech.com>  Thu, 10 Sep 2026 21:13:40 +0800
+
 wtmpdb (0.73.0-3+deb13u1) trixie; urgency=medium
 
   * Rotate and prune logs using logrotate (Closes: #1094965)
